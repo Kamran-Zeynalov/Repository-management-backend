@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Kapital A.S. MMC İcarə İdarəetmə</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/assets/css/dashboard.css" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div id="appLoader"><div class="loader-spinner"></div></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="app">
+        @await Html.PartialAsync("_Sidebar")
+        <main class="main">
+            @await Html.PartialAsync("_Header")
+            <section class="content">
+                @RenderBody()
+            </section>
+        </main>
+    </div>
+
+    @* Körpü: server cookie claim-lərini klient rol UI-na (dashboard-roles.js) ötür *@
+    @if (User?.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            try {
+                sessionStorage.setItem('kapital_role', '@(User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLowerInvariant())');
+                sessionStorage.setItem('kapital_branch', '@(User.FindFirst("BranchCode")?.Value)');
+            } catch (e) {}
+        </script>
+    }
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

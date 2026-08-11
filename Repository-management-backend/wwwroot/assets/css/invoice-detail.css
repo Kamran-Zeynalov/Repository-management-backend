@@ -1,0 +1,6 @@
+/* invoice-detail.css */
+.detail-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.items-table-card { margin-top: 18px; }
+.pay-history { margin-top: 18px; }
+.print-head h2 { font-size: 22px; margin-bottom: 4px; }
+.print-head p { color: var(--muted); font-size: 13px; }

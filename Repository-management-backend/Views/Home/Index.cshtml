@@ -1,0 +1,697 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div id="alertsBox"></div>
+
+<div id="dashboardSection" class="page-section active-section">
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Gecikən qaimələr</h2>
+                <p>Tarixi keçmiş aktiv qaimələr</p>
+            </div>
+            <button id="showAllBtn">Hamısına bax</button>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Qaimə</th>
+                        <th>Müştəri</th>
+                        <th>Qaytarma</th>
+                        <th>Məbləğ</th>
+                        <th>Status</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody id="dashboardTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="invoicesSection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Bütün qaimələr</h2>
+                <p>Edit, qismən qaytarma, 1 ay uzatma, ödəniş və filterlər</p>
+            </div>
+            <div class="toolbar-row">
+                <input type="text" id="invoiceSearchInput" class="toolbar-input search-toolbar-input" placeholder="Qaimə, müştəri, telefon axtar" />
+                <select id="statusFilterSelect" class="toolbar-input">
+                    <option value="all">Bütün statuslar</option>
+                    <option value="Aktiv">Aktiv</option>
+                    <option value="Gecikir">Gecikən</option>
+                    <option value="Bağlanıb">Bağlanan</option>
+                </select>
+                <input type="date" id="fromDateFilterInput" class="toolbar-input" />
+                <input type="date" id="toDateFilterInput" class="toolbar-input" />
+                <button id="clearInvoiceFiltersBtn" class="secondary-btn" type="button">Filtri sıfırla</button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Qaimə</th>
+                        <th>Müştəri</th>
+                        <th>Telefon</th>
+                        <th>Qaytarma</th>
+                        <th>Mallar</th>
+                        <th>Məbləğ</th>
+                        <th>Ödənilən</th>
+                        <th>Depozit</th>
+                        <th>Borc</th>
+                        <th>Status</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="customersSection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Müştərilər</h2>
+                <p>Əlavə et, edit et, sil</p>
+            </div>
+            <div class="toolbar-row">
+                <input type="text" id="customerSearchMainInput" class="toolbar-input search-toolbar-input" placeholder="Müştəri, telefon, ünvan axtar" />
+                <button id="addCustomerQuickBtn">+ Müştəri əlavə et</button>
+            </div>
+        </div>
+        <div id="customersList" class="simple-list"></div>
+    </div>
+</div>
+
+<div id="debtsSection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Borclar</h2>
+                <p>Açıq və gecikən borcların ümumi görünüşü</p>
+            </div>
+            <div class="toolbar-row">
+                <input type="text" id="debtCustomerFilterInput" class="toolbar-input" placeholder="Müştəri axtar" />
+                <select id="debtTypeFilterSelect" class="toolbar-input">
+                    <option value="all">Bütün borclar</option>
+                    <option value="overdue">Yalnız gecikənlər</option>
+                    <option value="normal">Yalnız vaxtında olanlar</option>
+                </select>
+                <input type="number" id="debtMinAmountInput" class="toolbar-input" placeholder="Min borc" min="0" step="0.01" />
+                <button id="clearDebtFiltersBtn" class="secondary-btn" type="button">Filtri sıfırla</button>
+                <button id="exportDebtCsvBtn" class="secondary-btn" type="button">CSV export</button>
+                <button id="printDebtListBtn" class="secondary-btn" type="button">Çap et</button>
+            </div>
+        </div>
+        <div id="debtSummaryGrid" class="report-grid debt-summary-grid"></div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Müştəri</th>
+                        <th>Telefon</th>
+                        <th>Ümumi borc</th>
+                        <th>Gecikən borc</th>
+                        <th>Son qaytarma</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody id="debtTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="depositsSection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Depozitlər</h2>
+                <p>Müştərilərin qalan depozitləri və istifadə imkanları</p>
+            </div>
+            <div class="toolbar-row">
+                <input type="text" id="depositCustomerFilterInput" class="toolbar-input" placeholder="Müştəri axtar" />
+                <select id="depositRangeFilterSelect" class="toolbar-input">
+                    <option value="all">Bütün tarix</option>
+                    <option value="today">Bu gün</option>
+                    <option value="month">Bu ay</option>
+                </select>
+                <button id="clearDepositFiltersBtn" class="secondary-btn" type="button">Filtri sıfırla</button>
+                <button id="exportDepositCsvBtn" class="secondary-btn" type="button">CSV export</button>
+                <button id="printDepositListBtn" class="secondary-btn" type="button">Çap et</button>
+            </div>
+        </div>
+        <div id="depositSummaryGrid" class="report-grid debt-summary-grid"></div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Müştəri</th>
+                        <th>Telefon</th>
+                        <th>Depozit</th>
+                        <th>Aktiv borc</th>
+                        <th>Xalis balans</th>
+                        <th>Aktiv qaimələr</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody id="depositTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="inventorySection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Anbar / Qalıq</h2>
+                <p>Malların ümumi sayı, icarədə olan miqdar, boş qalıq və kimlərə verildiyi</p>
+            </div>
+            <div class="toolbar-row">
+                <input type="text" id="inventorySearchInput" class="toolbar-input search-toolbar-input" placeholder="Mal adı ilə axtar" />
+                <button id="addInventoryItemBtn" class="secondary-btn" type="button">+ Anbara mal əlavə et</button>
+            </div>
+        </div>
+        <div id="inventorySummaryGrid" class="report-grid debt-summary-grid"></div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Mal</th><th>Ümumi say</th><th>İcarədə</th><th>Boş qalıq</th><th>Kimlərdədir</th><th>Əməliyyat</th></tr></thead>
+                <tbody id="inventoryTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="productsSection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Kateqoriyalar və seçimlər</h2>
+                <p>Standart mallar, əlavə kateqoriya və xidmətlər</p>
+            </div>
+        </div>
+
+        <div class="catalog-grid">
+            <div class="catalog-card">
+                <div class="catalog-card-head">
+                    <h3>Standart mallar</h3>
+                </div>
+                <div class="table-wrap inner-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kateqoriya</th>
+                                <th>Məlumat</th>
+                                <th>Qiymət</th>
+                                <th>Əməliyyat</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="catalog-card">
+                <div class="catalog-card-head">
+                    <h3>Əlavə kateqoriyası</h3>
+                    <button id="addExtraCategoryBtn">+ Əlavə et</button>
+                </div>
+                <div id="extraCategoryList" class="simple-list compact-list"></div>
+            </div>
+
+            <div class="catalog-card">
+                <div class="catalog-card-head">
+                    <h3>Xidmət kateqoriyası</h3>
+                    <button id="addServiceCategoryBtn">+ Əlavə et</button>
+                </div>
+                <div id="serviceCategoryList" class="simple-list compact-list"></div>
+            </div>
+
+            <div class="catalog-card">
+                <div class="catalog-card-head">
+                    <h3>Dəmir dirək ölçüləri</h3>
+                    <button id="addPoleCategoryBtn">+ Ölçü əlavə et</button>
+                </div>
+                <div id="poleCategoryList" class="simple-list compact-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="reportsSection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Hesabatlar</h2>
+                <p>Ümumi statistika və məlumatların ehtiyat nüsxəsi</p>
+            </div>
+            <div class="toolbar-row">
+                <button id="exportBackupBtn" class="secondary-btn" type="button">Backup export</button>
+                <button id="importBackupBtn" class="secondary-btn" type="button">Backup import</button>
+                <input type="file" id="importBackupInput" accept="application/json" class="hidden" />
+            </div>
+        </div>
+        <div id="reportsBox" class="report-grid"></div>
+    </div>
+</div>
+
+<div id="usersSection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>İşçilər</h2>
+                <p>Sistem işçiləri və rolları (yalnız Admin)</p>
+            </div>
+            <div class="toolbar-row">
+                <button id="addUserBtn" class="primary-btn" type="button">+ İşçi əlavə et</button>
+            </div>
+        </div>
+        <div id="usersSummaryGrid" class="report-grid debt-summary-grid"></div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ad</th>
+                        <th>İstifadəçi adı</th>
+                        <th>Rol</th>
+                        <th>Filial</th>
+                        <th>Telefon</th>
+                        <th>Status</th>
+                        <th>Əməliyyatlar</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="branchesSection" class="page-section">
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h2>Filialların idarə edilməsi</h2>
+                <p>Filial əlavə et, redaktə et və idarə et (yalnız Admin)</p>
+            </div>
+            <div class="toolbar-row">
+                <button id="addBranchBtn" class="primary-btn" type="button">+ Filial əlavə et</button>
+            </div>
+        </div>
+        <div id="branchesSummaryGrid" class="report-grid debt-summary-grid"></div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kod</th>
+                        <th>Ad</th>
+                        <th>Status</th>
+                        <th>İşçi</th>
+                        <th>Müştəri</th>
+                        <th>Qaimə</th>
+                        <th>Əməliyyatlar</th>
+                    </tr>
+                </thead>
+                <tbody id="branchesTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@* ====================== MODALLAR ====================== *@
+<div class="modal-overlay hidden" id="customerModal">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h3 id="customerModalTitle">Müştəri əlavə et</h3>
+            <button type="button" class="secondary-btn" data-close-modal="customerModal">Bağla</button>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group full">
+                <label for="customerNameInput">Ad</label>
+                <input type="text" id="customerNameInput" />
+            </div>
+            <div class="form-group">
+                <label for="customerPhoneInput">Telefon</label>
+                <input type="text" id="customerPhoneInput" />
+            </div>
+            <div class="form-group">
+                <label for="customerExtraPhoneInput">Əlavə telefon</label>
+                <input type="text" id="customerExtraPhoneInput" />
+            </div>
+            <div class="form-group full">
+                <label for="customerAddressInput">Ünvan</label>
+                <input type="text" id="customerAddressInput" />
+            </div>
+            <div class="form-group full">
+                <label for="customerNoteInput">Qeyd</label>
+                <input type="text" id="customerNoteInput" />
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="saveCustomerModalBtn" class="primary-btn">Yadda saxla</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="catalogModal">
+    <div class="modal-card small-modal">
+        <div class="modal-head">
+            <h3 id="catalogModalTitle">Yeni kateqoriya</h3>
+            <button type="button" class="secondary-btn" data-close-modal="catalogModal">Bağla</button>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group full">
+                <label for="catalogNameInput">Ad</label>
+                <input type="text" id="catalogNameInput" />
+            </div>
+            <div class="form-group">
+                <label for="catalogPriceInput">Qiymət</label>
+                <input type="number" id="catalogPriceInput" min="0" step="0.01" />
+            </div>
+            <div class="form-group">
+                <label for="catalogUnitInput">Vahid</label>
+                <input type="text" id="catalogUnitInput" placeholder="ədəd, xidmət, səfər" />
+            </div>
+            <div class="form-group">
+                <label for="catalogTypeInput">İcarə tipi</label>
+                <select id="catalogTypeInput">
+                    <option value="monthly">Aylıq</option>
+                    <option value="daily">Günlük</option>
+                </select>
+            </div>
+            <div class="form-group full">
+                <label for="catalogNoteInput">Qeyd</label>
+                <input type="text" id="catalogNoteInput" />
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="saveCatalogModalBtn" class="primary-btn">Yadda saxla</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="poleCategoryModal">
+    <div class="modal-card small-modal">
+        <div class="modal-head">
+            <h3 id="poleCategoryModalTitle">Dəmir dirək ölçüsü</h3>
+            <button type="button" class="secondary-btn" data-close-modal="poleCategoryModal">Bağla</button>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group full">
+                <label for="poleCategoryNameInput">Ölçü / ad</label>
+                <input type="text" id="poleCategoryNameInput" placeholder="Məs: 3.85, 1.70, 5.50" />
+            </div>
+            <div class="form-group">
+                <label for="poleCategoryPriceInput">1 ədəd qiyməti</label>
+                <input type="number" id="poleCategoryPriceInput" min="0" step="0.01" value="0" />
+            </div>
+            <div class="form-group">
+                <label for="poleCategoryUnitInput">Vahid</label>
+                <input type="text" id="poleCategoryUnitInput" value="ədəd" />
+            </div>
+            <div class="form-group">
+                <label for="poleCategoryStockInput">Anbar stoku</label>
+                <input type="number" id="poleCategoryStockInput" min="0" step="1" value="0" />
+            </div>
+            <div class="form-group full">
+                <label for="poleCategoryNoteInput">Qeyd</label>
+                <input type="text" id="poleCategoryNoteInput" placeholder="İstəyə bağlı qeyd" />
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="savePoleCategoryBtn" class="primary-btn">Yadda saxla</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="standardProductModal">
+    <div class="modal-card small-modal">
+        <div class="modal-head">
+            <h3 id="standardProductModalTitle">Standart malı edit et</h3>
+            <button type="button" class="secondary-btn" data-close-modal="standardProductModal">Bağla</button>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group full">
+                <label for="standardProductNameInput">Kateqoriya</label>
+                <input type="text" id="standardProductNameInput" readonly />
+            </div>
+            <div class="form-group">
+                <label for="standardProductPriceInput">Qiymət</label>
+                <input type="number" id="standardProductPriceInput" min="0" step="0.01" />
+            </div>
+            <div class="form-group">
+                <label for="standardProductUnitInput">Vahid</label>
+                <input type="text" id="standardProductUnitInput" placeholder="ədəd, m, gün" />
+            </div>
+            <div class="form-group full">
+                <label for="standardProductInfoInput">Məlumat</label>
+                <input type="text" id="standardProductInfoInput" />
+            </div>
+            <div class="form-group full">
+                <label for="standardProductNoteInput">Qeyd</label>
+                <input type="text" id="standardProductNoteInput" />
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="saveStandardProductBtn" class="primary-btn">Yadda saxla</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="inventoryItemModal">
+    <div class="modal-card small-modal">
+        <div class="modal-head">
+            <h3 id="inventoryItemModalTitle">Anbara mal əlavə et</h3>
+            <button type="button" class="secondary-btn" data-close-modal="inventoryItemModal">Bağla</button>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group full">
+                <label for="inventoryCategorySelect">Kateqoriya</label>
+                <select id="inventoryCategorySelect"></select>
+            </div>
+            <div class="form-group full hidden" id="inventorySizeGroup">
+                <label for="inventorySizeInput">Ölçü (məs: 3.85)</label>
+                <input type="text" id="inventorySizeInput" list="inventorySizeList" placeholder="Dəmir dirək ölçüsü" autocomplete="off" />
+                <datalist id="inventorySizeList"></datalist>
+            </div>
+            <div class="form-group full hidden" id="inventoryCustomNameGroup">
+                <label for="inventoryCustomNameInput">Malın adı</label>
+                <input type="text" id="inventoryCustomNameInput" placeholder="Məs: xüsusi qəlib, əlavə taxta" />
+            </div>
+            <div class="form-group full">
+                <label for="inventoryCountInput">Ümumi say</label>
+                <input type="number" id="inventoryCountInput" min="0" step="1" value="0" />
+            </div>
+            <div class="form-group full">
+                <label for="inventoryNoteInput">Qeyd</label>
+                <input type="text" id="inventoryNoteInput" placeholder="İstəyə bağlı qeyd" />
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="saveInventoryItemBtn" class="primary-btn">Yadda saxla</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="returnModal">
+    <div class="modal-card large-modal">
+        <div class="modal-head">
+            <h3 id="returnModalTitle">Qismən qaytarma</h3>
+            <button type="button" class="secondary-btn" data-close-modal="returnModal">Bağla</button>
+        </div>
+        <div id="returnItemsBox" class="return-list"></div>
+        <div class="modal-actions">
+            <button type="button" id="saveReturnBtn" class="primary-btn">Qaytarmanı təsdiq et</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="customerTransactionModal">
+    <div class="modal-card small-modal">
+        <div class="modal-head">
+            <h3 id="customerTransactionModalTitle">Müştəri əməliyyatı</h3>
+            <button type="button" class="secondary-btn" data-close-modal="customerTransactionModal">Bağla</button>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group full">
+                <label for="customerTransactionDateInput">Tarix</label>
+                <input type="datetime-local" id="customerTransactionDateInput" />
+            </div>
+            <div class="form-group full">
+                <label for="customerTransactionAmountInput">Məbləğ</label>
+                <input type="number" id="customerTransactionAmountInput" min="0" step="0.01" />
+            </div>
+            <div class="form-group full">
+                <label for="customerTransactionNoteInput">Qeyd</label>
+                <input type="text" id="customerTransactionNoteInput" placeholder="İstəyə bağlı qeyd" />
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="saveCustomerTransactionBtn" class="primary-btn">Əməliyyatı yadda saxla</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="invoicePaymentModal">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h3 id="invoicePaymentModalTitle">Qaimə ödənişi</h3>
+            <button type="button" class="secondary-btn" data-close-modal="invoicePaymentModal">Bağla</button>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="invoicePaymentDateInput">Tarix</label>
+                <input type="datetime-local" id="invoicePaymentDateInput" />
+            </div>
+            <div class="form-group">
+                <label for="invoicePaymentAmountInput">Məbləğ</label>
+                <input type="number" id="invoicePaymentAmountInput" min="0" step="0.01" />
+            </div>
+            <div class="form-group full">
+                <label for="invoicePaymentNoteInput">Qeyd</label>
+                <input type="text" id="invoicePaymentNoteInput" placeholder="İstəyə bağlı qeyd" />
+            </div>
+        </div>
+        <div class="modal-actions invoice-payment-actions">
+            <button type="button" id="saveInvoicePaymentBtn" class="primary-btn">Ödənişi yadda saxla</button>
+        </div>
+        <div class="invoice-history-box">
+            <div class="invoice-history-head">
+                <h4>Ödəniş tarixçəsi</h4>
+                <span id="invoicePaymentHistorySummary" class="customer-history-meta"></span>
+            </div>
+            <div id="invoicePaymentHistoryBox" class="invoice-payment-history-list"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="extensionModal">
+    <div class="modal-card small-modal">
+        <div class="modal-head">
+            <h3 id="extensionModalTitle">Qaimə müddətini artır</h3>
+            <button type="button" class="secondary-btn" data-close-modal="extensionModal">Bağla</button>
+        </div>
+        <div class="form-grid-2 extension-form-grid">
+            <div class="form-group full">
+                <label for="extensionTypeSelect">Artırma növü</label>
+                <select id="extensionTypeSelect">
+                    <option value="month">1 aylıq artırma</option>
+                    <option value="half">15 günlük artırma</option>
+                </select>
+            </div>
+            <div class="form-group full">
+                <label for="extensionPreviewAmount">Hesablanan əlavə borc</label>
+                <input type="text" id="extensionPreviewAmount" readonly />
+            </div>
+            <div class="form-group full">
+                <label for="extensionDiscountInput">Endirim</label>
+                <input type="number" id="extensionDiscountInput" min="0" step="0.01" value="0" />
+            </div>
+            <div class="form-group full">
+                <label for="extensionFinalAmount">Dəqiq əlavə olunacaq borc</label>
+                <input type="text" id="extensionFinalAmount" readonly />
+            </div>
+            <div class="form-group full">
+                <div id="extensionQuoteBox" class="extension-quote-box"></div>
+            </div>
+            <div class="form-group full">
+                <label for="extensionPaidNowInput">Müştəri indi nə qədər ödədi</label>
+                <input type="number" id="extensionPaidNowInput" min="0" step="0.01" value="0" />
+            </div>
+            <div class="form-group full">
+                <label for="extensionNoteInput">Qeyd</label>
+                <input type="text" id="extensionNoteInput" placeholder="İstəyə bağlı qeyd" />
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="saveExtensionBtn" class="primary-btn">Təsdiq et</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="invoiceCloseModal">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h3 id="invoiceCloseModalTitle">Qaiməni bağla</h3>
+            <button type="button" class="secondary-btn" data-close-modal="invoiceCloseModal">Bağla</button>
+        </div>
+        <div class="close-summary-grid">
+            <div class="close-summary-card">
+                <span class="close-summary-label">Qaimə</span>
+                <strong id="invoiceCloseSummaryNo">-</strong>
+            </div>
+            <div class="close-summary-card">
+                <span class="close-summary-label">Qalan borc</span>
+                <strong id="invoiceCloseSummaryDebt">0.00 AZN</strong>
+            </div>
+            <div class="close-summary-card">
+                <span class="close-summary-label">Qalan depozit</span>
+                <strong id="invoiceCloseSummaryDeposit">0.00 AZN</strong>
+            </div>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="invoiceCloseDateInput">Tarix</label>
+                <input type="datetime-local" id="invoiceCloseDateInput" />
+            </div>
+            <div class="form-group">
+                <label for="invoiceClosePaidInput">Müştəri indi nə qədər ödədi</label>
+                <input type="number" id="invoiceClosePaidInput" min="0" step="0.01" value="0" />
+            </div>
+            <div class="form-group">
+                <label for="invoiceCloseDepositReturnedInput">Nə qədər depozit qaytarıldı</label>
+                <input type="number" id="invoiceCloseDepositReturnedInput" min="0" step="0.01" value="0" />
+            </div>
+            <div class="form-group">
+                <label for="invoiceClosePenaltyInput">Cərimə məbləği</label>
+                <input type="number" id="invoiceClosePenaltyInput" min="0" step="0.01" value="0" />
+            </div>
+            <div class="form-group full">
+                <label for="invoiceClosePenaltyReasonInput">Cərimə səbəbi</label>
+                <input type="text" id="invoiceClosePenaltyReasonInput" placeholder="Məs: 1 başlıq zədələnib" />
+            </div>
+            <div class="form-group full">
+                <label for="invoiceCloseNoteInput">Ümumi qeyd</label>
+                <textarea id="invoiceCloseNoteInput" rows="3" placeholder="İstəyə bağlı qeyd"></textarea>
+            </div>
+        </div>
+        <div class="close-helper-box" id="invoiceCloseHelperBox"></div>
+        <div class="modal-actions">
+            <button type="button" id="saveInvoiceCloseBtn" class="primary-btn">Bağlamanı təsdiq et</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="invoiceViewModal">
+    <div class="modal-card large-modal invoice-view-modal">
+        <div class="modal-head">
+            <h3 id="invoiceViewTitle">Qaiməyə baxış</h3>
+            <div class="action-cell">
+                <button type="button" id="invoiceViewPrintBtn" class="primary-btn">Çap et</button>
+                <button type="button" id="invoiceViewEditBtn" class="secondary-btn">Edit</button>
+                <button type="button" id="invoiceViewDeleteBtn" class="secondary-btn danger-outline">Sil</button>
+                <button type="button" class="secondary-btn" data-close-modal="invoiceViewModal">Bağla</button>
+            </div>
+        </div>
+        <div id="invoiceViewBody" class="invoice-view-body"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/js/api.js?v=7"></script>
+    <script src="~/assets/js/data.js?v=7"></script>
+    <script src="~/assets/js/dashboard.js?v=7"></script>
+    <script src="~/assets/js/ui-enhance.js?v=7"></script>
+    <script src="~/assets/js/dashboard-roles.js?v=7"></script>
+}

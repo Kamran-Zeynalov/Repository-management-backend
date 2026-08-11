@@ -1,0 +1,3 @@
+/* categories.css */
+#catTable td .cat-name { font-weight: 700; }
+#catTable td .cat-sub { color: var(--muted); padding-left: 14px; }

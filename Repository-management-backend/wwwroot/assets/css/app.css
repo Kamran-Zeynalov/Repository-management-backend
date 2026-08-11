@@ -1,0 +1,259 @@
+/* =====================================================================
+   app.css — yeni səhifələr üçün paylaşılan əlavələr.
+   dashboard.css-in dizayn sistemini genişləndirir (üzərinə yazmır).
+   ===================================================================== */
+
+/* ----------------------------------------------------------------- Rol seçici */
+.role-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  box-shadow: var(--shadow-sm);
+}
+.role-selector-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.role-selector select {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  background: transparent;
+  cursor: pointer;
+  min-width: auto;
+  padding: 4px 6px;
+}
+
+/* ----------------------------------------------------------------- Əlavə badge rəngləri */
+.badge.blue {
+  background: var(--info-bg);
+  color: var(--info-text);
+  border-color: #bae6fd;
+}
+.badge.gray {
+  background: #e2e8f0;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+.badge.violet {
+  background: #ede9fe;
+  color: #6d28d9;
+  border-color: #ddd6fe;
+}
+
+/* ----------------------------------------------------------------- İcazə yoxdur mesajı */
+.no-access {
+  margin: 40px auto;
+  max-width: 520px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 40px 28px;
+}
+.no-access .icon {
+  font-size: 44px;
+  margin-bottom: 12px;
+}
+.no-access h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.no-access p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ----------------------------------------------------------------- Tablar */
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 14px 20px 0;
+}
+.tab-btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.tab-btn:hover { background: var(--card-soft); }
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ----------------------------------------------------------------- Detal başlığı (geri linki) */
+.detail-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  transition: 0.16s ease;
+}
+.back-link:hover { background: var(--card-soft); color: var(--text); }
+
+/* ----------------------------------------------------------------- KPI sətri (detal) */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.kpi-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.kpi-card .label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.kpi-card .num { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.kpi-card.debt .num { color: var(--danger-text); }
+.kpi-card.deposit .num { color: #6d28d9; }
+.kpi-card.paid .num { color: var(--success-text); }
+@media (max-width: 1050px) { .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .kpi-row { grid-template-columns: 1fr; } }
+
+/* ----------------------------------------------------------------- Sıfır-stok xəbərdarlığı */
+.warn-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  color: #92400e;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------------------- Login səhifəsi */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.login-card {
+  width: min(440px, 100%);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 34px 30px;
+  text-align: center;
+}
+.login-logo {
+  width: 180px;
+  max-width: 70%;
+  margin: 0 auto 18px;
+  display: block;
+  background: #fff;
+  border-radius: 16px;
+}
+.login-card h1 { font-size: 22px; margin-bottom: 6px; letter-spacing: -0.02em; }
+.login-card .sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+.login-form { display: grid; gap: 14px; text-align: left; }
+.role-pick { display: grid; gap: 10px; }
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: 0.16s ease;
+  background: #fff;
+}
+.role-option:hover { border-color: #c7d2e3; background: var(--card-soft); }
+.role-option.selected {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+  background: var(--primary-soft);
+}
+.role-option .role-emoji { font-size: 24px; }
+.role-option .role-name { font-weight: 700; font-size: 15px; }
+.role-option .role-desc { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.login-card .login-btn { width: 100%; margin-top: 8px; }
+
+/* ----------------------------------------------------------------- Çap (print) */
+@media print {
+  .sidebar, .header, .menu-toggle, .role-selector, .sidebar-overlay,
+  #appLoader, .action-cell, .toolbar-row, .no-print, .back-link,
+  .secondary-btn, .primary-btn, .link-btn, .tab-btn {
+    display: none !important;
+  }
+  body { background: #fff !important; }
+  .app { display: block !important; }
+  .main { padding: 0 !important; }
+  .section-card, .invoice-view-card, .kpi-card {
+    box-shadow: none !important;
+    border-color: #cbd5e1 !important;
+    break-inside: avoid;
+  }
+  .content { margin-top: 0 !important; }
+  table { min-width: 0 !important; }
+}
+
+/* yalnız çapda görünən başlıq */
+.print-only { display: none; }
+@media print { .print-only { display: block; text-align: center; margin-bottom: 16px; } }
+
+/* ============ Çıxış təsdiq modalı ============ */
+.logout-modal-card { width: min(420px, 100%); text-align: center; }
+.logout-modal-icon {
+  width: 56px; height: 56px; margin: 4px auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--danger-bg, #fef2f2);
+  color: #dc2626; font-size: 26px;
+}
+.logout-modal-card h3 { font-size: 18px; margin-bottom: 6px; }
+.logout-modal-card p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+.logout-modal-card .modal-actions { justify-content: center; }
+.logout-confirm-btn {
+  background: #dc2626; border-color: #dc2626; color: #fff;
+}
+.logout-confirm-btn:hover { background: #b91c1c; border-color: #b91c1c; }

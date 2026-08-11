@@ -1,0 +1,3 @@
+/* invoices.css — qaimələr səhifəsi üçün kiçik tənzimləmələr */
+#invoiceTable td .inv-number { font-weight: 700; }
+#invoiceTable td .muted-sub { color: var(--muted); font-size: 12px; margin-top: 3px; }

@@ -1,0 +1,61 @@
+@using Repository_management_backend.Models.Entities
+@model Repository_management_backend.Models.ViewModels.LoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Giriş";
+    var branches = ViewBag.Branches as IEnumerable<Branch> ?? new List<Branch>();
+}
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giriş — Kapital A.S. MMC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/assets/css/dashboard.css" />
+    <link rel="stylesheet" href="~/assets/css/app.css" />
+    <link rel="stylesheet" href="~/assets/css/login.css" />
+</head>
+<body class="login-page">
+    <div class="login-card">
+        <img src="~/assets/img/kapital-logo.png" alt="Kapital A.S. MMC" class="login-logo" />
+        <h1>İcarə İdarəetmə Sistemi</h1>
+        <p class="sub">İstifadəçi adı və şifrə ilə daxil olun</p>
+
+        <form class="login-form" asp-controller="Account" asp-action="Login" method="post" autocomplete="off">
+            <div class="form-group full">
+                <label asp-for="Username">İstifadəçi adı</label>
+                <input asp-for="Username" autocomplete="off" placeholder="məs. nigar" />
+            </div>
+            <div class="form-group full">
+                <label asp-for="Password">Şifrə</label>
+                <input asp-for="Password" type="password" autocomplete="new-password" placeholder="••••••••" />
+            </div>
+            <div class="form-group full">
+                <label asp-for="BranchCode">Filial</label>
+                <select asp-for="BranchCode" class="toolbar-input">
+                    <option value="">Filial seçin</option>
+                    @foreach (var br in branches)
+                    {
+                        <option value="@br.Code">@br.Name</option>
+                    }
+                </select>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="login-error">
+                    @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@err.ErrorMessage</div>
+                    }
+                </div>
+            }
+
+            <button type="submit" class="primary-btn login-btn">Daxil ol</button>
+        </form>
+    </div>
+</body>
+</html>
