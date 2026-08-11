@@ -1,0 +1,20 @@
+﻿1 - 60-liq lessa lesa, tekerli, ve adi lesa basliqlari ferqli olmalidir anbarda.
+
+2 - Demir Direk Yaradilanlar Select kimi Anbarda gelmelidir.
+
+3  - Taxt Anbarda Select kimi olmalidir. mes. 5/15 5/10.
+
+4 - Anbar mal elave et hissesinde lesa taxtalar, lesa tekerli taxta, lesa BUNLAR OLMAMALIDIR.
+
+5 - Anbar mal elave et hissesinde Bir terefi boy dikt secilen zaman Olcu yazilmalidir, inputda. Qaime yaradilan zaman ANbardaki ile 2-ci tərəf (m) beraberlesdirilmelidir.
+
+6 - Borclarda Geciken borc silinecek.
+
+7 - Depozitlerde yuxaridakilardan sadece Ümumi depozit bu qalacaq.
+
+8 - Standart mallar-da DEmir direk olmamalidir. Standart mallarin qiymeti ile qaime yaradilanda inputdaki qiymetler beraberlesmelidir.
+
+9 - ⚠️ Bildirişləri sil, Tamamile.
+
+10 - User ve menecer Hansi filiala istese gire bilsin. Sadece login olma yerinde.
+
