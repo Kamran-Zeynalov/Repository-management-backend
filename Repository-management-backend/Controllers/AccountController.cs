@@ -78,7 +78,8 @@ namespace Repository_management_backend.Controllers
             }
             else
             {
-                // İşçi/Menecer üçün filial məcburidir və yalnız öz filialı ilə girə bilər
+                // DÜZƏLİŞ: İşçi/Menecer də İNDİ istənilən filialı seçə bilər — yalnız GİRİŞ zamanı.
+                // (Sessiya daxilində filial dəyişmək hələ də yalnız Admin üçündür — SwitchBranch action-a bax.)
                 if (string.IsNullOrWhiteSpace(model.BranchCode))
                 {
                     ModelState.AddModelError(string.Empty, "Filial seçin.");
@@ -89,12 +90,6 @@ namespace Repository_management_backend.Controllers
                 if (branch == null)
                 {
                     ModelState.AddModelError(string.Empty, "Filial seçin.");
-                    await PopulateBranchesAsync();
-                    return View(model);
-                }
-                if (branch.Id != user.BranchId)
-                {
-                    ModelState.AddModelError(string.Empty, "Bu işçi seçilmiş filiala aid deyil.");
                     await PopulateBranchesAsync();
                     return View(model);
                 }

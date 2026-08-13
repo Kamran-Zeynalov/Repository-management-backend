@@ -62,19 +62,22 @@ namespace Repository_management_backend.Repositories
                     });
                 }
 
-                // "Lesa" və "60-lıq Lesa" eyni fiziki hissələri (başlıq/çubuq/taxta) işlədir —
-                // yalnız qiymətləndirmə/kateqoriya fərqlidir (bax: dashboard.js seedData: "Adi lesa kimi işləyir").
-                // Ona görə hər ikisi eyni Anbar adlarına uyğunlaşdırılır.
-                // Adlar dəqiq olaraq dashboard.js -> getInventoryCategoryOptions() ilə eynidir.
-                if (string.Equals(it.Category, "Lesa", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(it.Category, "60-lıq Lesa", StringComparison.OrdinalIgnoreCase))
+                // DÜZƏLİŞ: "Lesa" (adi) və "60-lıq Lesa" artıq Anbarda AYRI-AYRI mallar kimi izlənir.
+                if (string.Equals(it.Category, "Lesa", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Sabit ləsa "dəst"inin komponentləri — hər biri Anbarda ayrı mal kimi izlənir
                     Add("Lesa başlıq", null, it.LesaHeadCount ?? 0);
                     Add("Lesa uzun çubuq", null, it.LesaLongRodCount ?? 0);
                     Add("Lesa balaca çubuq", null, it.LesaShortRodCount ?? 0);
                     Add("Lesa taxta 5/15 3.00", null, it.LesaFreeTaxtaCount ?? 0);
                     Add("Lesa əlavə taxta 5/15 3.00", null, it.LesaExtraTaxtaCount ?? 0);
+                }
+                else if (string.Equals(it.Category, "60-lıq Lesa", StringComparison.OrdinalIgnoreCase))
+                {
+                    Add("60-lıq Lesa başlıq", null, it.LesaHeadCount ?? 0);
+                    Add("60-lıq Lesa uzun çubuq", null, it.LesaLongRodCount ?? 0);
+                    Add("60-lıq Lesa balaca çubuq", null, it.LesaShortRodCount ?? 0);
+                    Add("60-lıq Lesa taxta 5/15 3.00", null, it.LesaFreeTaxtaCount ?? 0);
+                    Add("60-lıq Lesa əlavə taxta 5/15 3.00", null, it.LesaExtraTaxtaCount ?? 0);
                 }
                 else if (string.Equals(it.Category, "Təkərli lesa", StringComparison.OrdinalIgnoreCase))
                 {

@@ -697,12 +697,14 @@ function addTaxtaItem() {
     id: `item-${Date.now()}-${Math.random()}`,
     category: 'Taxta',
     label: 'Taxta',
-    size: `${type} / ${length.toFixed(2)} m`,
+    // DÜZƏLİŞ: size İNDİ yalnız növü (məs. "5/15") daşıyır ki, Anbardakı "Taxta 5/15"
+    // adı ilə dəqiq uyğunlaşsın. Uzunluq isə qeyddə göstərilir.
+    size: type,
     unit: 'ədəd',
     quantity,
     customPrice: totalPrice / quantity,
     subtotal: totalPrice,
-    note: `1 metr: ${formatMoney(rate)} AZN`,
+    note: `Uzunluq: ${length.toFixed(2)} m, 1 metr: ${formatMoney(rate)} AZN`,
     isReturnable: true,
     isRecurring: true
   });
@@ -724,12 +726,15 @@ function addSheetItem() {
     id: `item-${Date.now()}-${Math.random()}`,
     category,
     label: category,
-    size: `${sideA.toFixed(2)} x ${sideB.toFixed(2)} m`,
+    // DÜZƏLİŞ (tapşırıq 5): "Bir tərəfli boy dikt" üçün yalnız DƏYİŞƏN 2-ci tərəf (en, m) `size`-ə
+    // yazılır ki, Anbardakı "Bir tərəfli boy dikt <en> m" adı ilə dəqiq uyğunlaşsın
+    // (1-ci tərəf sabitdir, ona görə fərqləndirici deyil). "Kəsok dikt"də köhnə format saxlanılır.
+    size: category === 'Bir tərəfli boy dikt' ? `${sideB.toFixed(2)} m` : `${sideA.toFixed(2)} x ${sideB.toFixed(2)} m`,
     unit: 'ədəd',
     quantity,
     customPrice: totalPrice / quantity,
     subtotal: totalPrice,
-    note: `Sahə: ${area.toFixed(2)} m², 1 m²: ${formatMoney(rate)} AZN`,
+    note: `Ölçü: ${sideA.toFixed(2)} x ${sideB.toFixed(2)} m, Sahə: ${area.toFixed(2)} m², 1 m²: ${formatMoney(rate)} AZN`,
     isReturnable: true,
     isRecurring: true
   });

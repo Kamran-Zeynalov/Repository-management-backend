@@ -402,7 +402,9 @@ const inventoryCustomNameGroup = document.getElementById('inventoryCustomNameGro
 const inventoryCustomNameInput = document.getElementById('inventoryCustomNameInput');
 const inventorySizeGroup = document.getElementById('inventorySizeGroup');
 const inventorySizeInput = document.getElementById('inventorySizeInput');
-const inventorySizeList = document.getElementById('inventorySizeList');
+const inventorySizeLabel = document.getElementById('inventorySizeLabel');
+const inventoryWidthGroup = document.getElementById('inventoryWidthGroup');
+const inventoryWidthInput = document.getElementById('inventoryWidthInput');
 const inventoryCountInput = document.getElementById('inventoryCountInput');
 const inventoryNoteInput = document.getElementById('inventoryNoteInput');
 const saveInventoryItemBtn = document.getElementById('saveInventoryItemBtn');
@@ -771,36 +773,11 @@ function getDueTekerliLesaItems() {
 }
 
 /* ===== Modul 6: Dashboard — SQL Server (API) ===== */
+// DÜZƏLİŞ: Bildirişlər tam olaraq deaktiv edildi (istək üzrə). Panel heç vaxt göstərilmir.
 async function renderAlerts() {
   if (!alertsBox) return;
-  let notes;
-  try { notes = await API.dashboard.notifications(); }
-  catch (e) { return; }
-  if (!notes.length) { alertsBox.innerHTML = ''; return; }
-  alertsBox.innerHTML = `
-    <div class="alert-card">
-      <h3>⚠️ Bildirişlər</h3>
-      <div class="alert-list">
-        ${notes.map(n => `
-          <div class="alert-item">
-            <strong>${escapeHtml(n.message)}</strong>
-            ${n.invoiceId ? `<div>Qaimə: <a class="inv-invoice-link" onclick="editInvoice('${n.invoiceId}')" title="Qaiməyə keçid">${escapeHtml(n.invoiceNo || '-')}</a></div>` : ''}
-            ${n.customerName ? `<div>Müştəri: ${escapeHtml(n.customerName)}</div>` : ''}
-          </div>`).join('')}
-      </div>
-    </div>`;
-
-  // Maksimum 4 bildiriş göstər — qalanı üçün yalnız panel daxili şaquli scroll
-  const listEl = alertsBox.querySelector('.alert-list');
-  if (listEl) {
-    const items = listEl.querySelectorAll('.alert-item');
-    if (items.length > 4) {
-      const maxH = items[4].offsetTop - items[0].offsetTop;
-      listEl.style.maxHeight = maxH + 'px';
-      listEl.style.overflowY = 'auto';
-      listEl.style.paddingRight = '6px';
-    }
-  }
+  alertsBox.innerHTML = '';
+  return;
 }
 
 async function renderStats() {
@@ -1350,7 +1327,9 @@ async function renderProducts() {
   try { data = await API.categories.list('Standard'); }
   catch (e) { productsTable.innerHTML = '<tr><td colspan="4">Xəta: ' + escapeHtml(e.message || '') + '</td></tr>'; return; }
   standardCatalog = data;
-  const rows = data.map(d => ({
+  // DÜZƏLİŞ: "Dəmir dirək" Standart mallar siyahısından çıxarıldı — o, artıq
+  // ayrıca Pole (ölçü) kateqoriyaları vasitəsilə idarə olunur, burada təkrarlanmasın.
+  const rows = data.filter(d => (d.name || '').trim() !== 'Dəmir dirək').map(d => ({
     id: d.id,
     category: d.name,
     info: d.info || '',
@@ -1572,17 +1551,35 @@ async function renderInventorySection(){
   inventoryTableBody.innerHTML=rows.map(row=>`<tr><td><strong>${escapeHtml(row.name)}</strong></td><td>${row.total}</td><td>${row.rented}</td><td><span class="${row.available<0?'inventory-low':'inventory-positive'}">${row.available}</span></td><td>${row.rented>0 ? `<button class="action-btn edit" onclick="toggleInventoryHolders(${row.id})">Ətraflı</button><div class="inventory-holders-detail hidden" id="inv-holders-${row.id}"></div>` : '<span class="inventory-empty-holder">Hazırda heç kimdə deyil</span>'}</td><td><div class="action-cell"><button class="action-btn edit" onclick="openInventoryItemModal(${row.id})">Edit</button><button class="action-btn delete" onclick="deleteInventoryStock(${row.id})">Sil</button></div></td></tr>`).join('');
 }
 function getInventoryCategoryOptions(){
-  const standard = getStandardProducts().map(x=>x.category).filter(Boolean);
+  // DÜZƏLİŞ (tapşırıq 4): "Təkərli lesa" (gündəlik icarə/billing kateqoriyasıdır, sayıla bilən
+  // fiziki mal deyil) və çılpaq "Lesa"/"60-lıq Lesa" adları Anbara mal əlavə et siyahısından çıxarıldı —
+  // yalnız konkret komponentlər (başlıq/çubuq/taxta) seçilə bilər.
+  const EXCLUDED_STANDARD = ['Təkərli lesa', 'Lesa', '60-lıq Lesa', 'Xidmət', 'Nəqliyyat'];
+  const standard = getStandardProducts().map(x=>x.category).filter(name => name && !EXCLUDED_STANDARD.includes(name));
   const lesaParts = ['Lesa başlıq','Lesa uzun çubuq','Lesa balaca çubuq','Lesa taxta 5/15 3.00','Lesa əlavə taxta 5/15 3.00'];
+  // DÜZƏLİŞ (tapşırıq 1): "60-lıq Lesa" komponentləri "Lesa"dan ayrı, öz adları ilə izlənir.
+  const lesa60Parts = ['60-lıq Lesa başlıq','60-lıq Lesa uzun çubuq','60-lıq Lesa balaca çubuq','60-lıq Lesa taxta 5/15 3.00','60-lıq Lesa əlavə taxta 5/15 3.00'];
   const tekerliParts = ['Təkərli lesa başlıq','Təkərli lesa çubuq','Təkərli lesa vilka','Təkərli lesa taxta','Təkərli lesa əlavə taxta'];
   const extras = extraCategories.map(x=>x.name).filter(Boolean);
-  return Array.from(new Set([...lesaParts, ...tekerliParts, 'Pales', ...standard, ...extras])).filter(name => name && name !== 'Xidmət' && name !== 'Nəqliyyat');
+  return Array.from(new Set([...lesaParts, ...lesa60Parts, ...tekerliParts, 'Pales', ...standard, ...extras]));
 }
+// DÜZƏLİŞ (tapşırıq 3): Taxta üçün ölçülər — invoice yaratma səhifəsindəki (Create.cshtml #taxtaType)
+// seçimlərlə EYNİ olmalıdır, yoxsa Anbar heç vaxt uyğunlaşmaz.
+const TAXTA_SIZE_OPTIONS = ['5/10', '5/15'];
 function updateInventorySizeUI(){
-  const isDirek = inventoryCategorySelect && inventoryCategorySelect.value === 'Dəmir dirək';
-  if(inventorySizeGroup) inventorySizeGroup.classList.toggle('hidden', !isDirek);
-  if(isDirek && inventorySizeList){
-    inventorySizeList.innerHTML = (poleCategories||[]).map(p=>`<option value="${escapeHtml(p.name)}"></option>`).join('');
+  const cat = inventoryCategorySelect && inventoryCategorySelect.value;
+  const isDirek = cat === 'Dəmir dirək';
+  const isTaxta = cat === 'Taxta';
+  const isBoyDikt = cat === 'Bir tərəfli boy dikt'; // tapşırıq 5
+  if(inventorySizeGroup) inventorySizeGroup.classList.toggle('hidden', !isDirek && !isTaxta);
+  if(inventoryWidthGroup) inventoryWidthGroup.classList.toggle('hidden', !isBoyDikt);
+  if(!inventorySizeInput) return;
+  if(isDirek){
+    if(inventorySizeLabel) inventorySizeLabel.textContent = 'Ölçü';
+    inventorySizeInput.innerHTML = (poleCategories||[]).map(p=>`<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join('') || '<option value="">Ölçü yoxdur — əvvəlcə Kateqoriyalar/Ölçülər bölməsində əlavə edin</option>';
+  } else if(isTaxta){
+    if(inventorySizeLabel) inventorySizeLabel.textContent = 'Ölçü';
+    inventorySizeInput.innerHTML = TAXTA_SIZE_OPTIONS.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
   }
 }
 function fillInventoryCategorySelect(selected=''){
@@ -1599,6 +1596,7 @@ window.openInventoryItemModal = function(id=null){
   const item = (id != null) ? inventoryCache.find(x => String(x.id) === String(id)) : null;
   inventoryItemModalTitle.textContent = item ? 'Anbar malını edit et' : 'Anbara mal əlavə et';
   if(inventorySizeInput) inventorySizeInput.value = '';
+  if(inventoryWidthInput) inventoryWidthInput.value = '';
   fillInventoryCategorySelect(item ? item.name : '');
   inventoryCountInput.value = item ? Number(item.total || 0) : '0';
   inventoryNoteInput.value = '';
@@ -1613,8 +1611,16 @@ async function saveInventoryItemFromModal(){
     name = (inventoryCustomNameInput.value || '').trim();
   } else if (selected === 'Dəmir dirək') {
     const size = (inventorySizeInput.value || '').trim();
-    if (!size) return alert('Dəmir dirək ölçüsünü yaz (məs: 3.85).');
+    if (!size) return alert('Dəmir dirək ölçüsünü seç (əvvəlcə Kateqoriyalar/Ölçülər bölməsində əlavə edin).');
     name = ('Dəmir dirək ' + size).trim();
+  } else if (selected === 'Taxta') {
+    const size = (inventorySizeInput.value || '').trim();
+    if (!size) return alert('Taxta ölçüsünü seç (məs: 5/15).');
+    name = ('Taxta ' + size).trim();
+  } else if (selected === 'Bir tərəfli boy dikt') {
+    const width = (inventoryWidthInput.value || '').trim();
+    if (!width || Number(width) <= 0) return alert('Ölçünü (2-ci tərəf, m) yaz.');
+    name = ('Bir tərəfli boy dikt ' + Number(width).toFixed(2) + ' m').trim();
   } else {
     name = selected;
   }
@@ -3118,8 +3124,7 @@ async function renderDebtsSection() {
 
   summary.innerHTML = `
     <div class="report-box"><h4>Borclu müştəri</h4><strong>${rows.length}</strong><small>Borcu olan müştərilər</small></div>
-    <div class="report-box"><h4>Ümumi borc</h4><strong>${formatMoney(totalDebt)}</strong><small>Bütün müştərilərin borcu</small></div>
-    <div class="report-box"><h4>Gecikən borc</h4><strong>${formatMoney(totalOverdue)}</strong><small>${overdueCustomers} müştəri gecikib${top ? ` / Ən çox: ${escapeHtml(top.name)} (${formatMoney(top.debt)})` : ''}</small></div>`;
+    <div class="report-box"><h4>Ümumi borc</h4><strong>${formatMoney(totalDebt)}</strong><small>Bütün müştərilərin borcu</small></div>`;
 
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6">Açıq borc yoxdur</td></tr>'; return; }
 
@@ -3180,9 +3185,7 @@ async function renderDepositsSection() {
   const usable = rows.filter(r => r.deposit > 0 && r.debt > 0).length;
   const pure = rows.filter(r => r.deposit > 0 && r.debt <= 0).length;
   summary.innerHTML = `
-    <div class="report-box"><h4>Ümumi depozit</h4><strong>${formatMoney(totalDeposit)}</strong><small>Qalan depozit</small></div>
-    <div class="report-box"><h4>Depozitlə bağlana bilən</h4><strong>${usable}</strong><small>Borcu+depoziti olan</small></div>
-    <div class="report-box"><h4>Təmiz depozit qalığı</h4><strong>${pure}</strong><small>Yalnız depozit qalan</small></div>`;
+    <div class="report-box"><h4>Ümumi depozit</h4><strong>${formatMoney(totalDeposit)}</strong><small>Qalan depozit</small></div>`;
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7">Depozit məlumatı yoxdur</td></tr>'; return; }
   tbody.innerHTML = rows.map(r => {
     const net = r.deposit - r.debt;
