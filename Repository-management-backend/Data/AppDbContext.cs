@@ -32,6 +32,7 @@ namespace Repository_management_backend.Data
         public DbSet<InventoryStock> InventoryStocks => Set<InventoryStock>();
         public DbSet<ExtensionHistory> ExtensionHistories => Set<ExtensionHistory>();
         public DbSet<ReturnHistory> ReturnHistories => Set<ReturnHistory>();
+        public DbSet<InventorySale> InventorySales => Set<InventorySale>();
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -157,10 +158,24 @@ namespace Repository_management_backend.Data
                     .HasForeignKey(x => x.InvoiceId).OnDelete(DeleteBehavior.Cascade);
             });
 
+            b.Entity<InventorySale>(e =>
+            {
+                e.Property(x => x.StockNameSnapshot).HasMaxLength(150).IsRequired();
+                e.Property(x => x.CustomerName).HasMaxLength(200);
+                e.Property(x => x.Note).HasMaxLength(500);
+                e.Property(x => x.SoldByUserName).HasMaxLength(150);
+                e.HasOne(x => x.Branch).WithMany()
+                    .HasForeignKey(x => x.BranchId).OnDelete(DeleteBehavior.Restrict);
+                // Restrict: InventoryStock silinərkən satış tarixçəsi qalsın deyə (əvvəlcə satışı silmək lazımdır).
+                e.HasOne(x => x.InventoryStock).WithMany()
+                    .HasForeignKey(x => x.InventoryStockId).OnDelete(DeleteBehavior.Restrict);
+            });
+
             b.Entity<Customer>().HasQueryFilter(e => e.BranchId == _currentBranchId);
             b.Entity<Invoice>().HasQueryFilter(e => e.BranchId == _currentBranchId);
             b.Entity<Category>().HasQueryFilter(e => e.BranchId == _currentBranchId);
             b.Entity<InventoryStock>().HasQueryFilter(e => e.BranchId == _currentBranchId);
+            b.Entity<InventorySale>().HasQueryFilter(e => e.BranchId == _currentBranchId);
 
             b.Entity<Branch>().HasData(
                 new Branch { Id = 1, Code = "merdekan", Name = "Mərdəkan filialı", IsActive = true },

@@ -25,6 +25,20 @@ namespace Repository_management_backend.Repositories
                 s.BranchId == branchId && s.Name.ToLower() == n && (excludeId == null || s.Id != excludeId));
         }
 
+        // DÜZƏLİŞ: "Satış" funksionallığı — icarədən fərqli olaraq TotalCount-u həmişəlik azaldır.
+        public Task AddSaleAsync(InventorySale sale)
+        {
+            _db.InventorySales.Add(sale);
+            return Task.CompletedTask;
+        }
+
+        public async Task<List<InventorySale>> GetSalesAsync(int? stockId = null)
+        {
+            var q = _db.InventorySales.AsNoTracking().OrderByDescending(s => s.SoldAt).AsQueryable();
+            if (stockId.HasValue) q = q.Where(s => s.InventoryStockId == stockId.Value);
+            return await q.ToListAsync();
+        }
+
         // Açıq qaimələrdə qaytarılan (IsReturnable) və hələ tam qaytarılmamış mallar.
         // Invoice query filter tətbiq olunduğu üçün yalnız cari filial.
         public async Task<List<RentedRow>> GetOpenRentedRowsAsync()

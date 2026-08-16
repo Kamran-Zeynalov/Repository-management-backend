@@ -1548,7 +1548,56 @@ async function renderInventorySection(){
   const lowCount=inventoryCache.filter(r=>r.available<0).length;
   inventorySummaryGrid.innerHTML=`<div class="report-box"><h4>Ümumi anbar sayı</h4><p>${totalStock}</p></div><div class="report-box"><h4>İcarədə olan</h4><p>${totalOut}</p></div><div class="report-box"><h4>Qalıq problemi</h4><p>${lowCount}</p></div>`;
   if(!rows.length){ inventoryTableBody.innerHTML='<tr><td colspan="6">Anbarda mal yoxdur. + Anbara mal əlavə et düyməsi ilə əlavə et.</td></tr>'; return; }
-  inventoryTableBody.innerHTML=rows.map(row=>`<tr><td><strong>${escapeHtml(row.name)}</strong></td><td>${row.total}</td><td>${row.rented}</td><td><span class="${row.available<0?'inventory-low':'inventory-positive'}">${row.available}</span></td><td>${row.rented>0 ? `<button class="action-btn edit" onclick="toggleInventoryHolders(${row.id})">Ətraflı</button><div class="inventory-holders-detail hidden" id="inv-holders-${row.id}"></div>` : '<span class="inventory-empty-holder">Hazırda heç kimdə deyil</span>'}</td><td><div class="action-cell"><button class="action-btn edit" onclick="openInventoryItemModal(${row.id})">Edit</button><button class="action-btn delete" onclick="deleteInventoryStock(${row.id})">Sil</button></div></td></tr>`).join('');
+  inventoryTableBody.innerHTML=rows.map(row=>`<tr><td><strong>${escapeHtml(row.name)}</strong></td><td>${row.total}</td><td>${row.rented}</td><td><span class="${row.available<0?'inventory-low':'inventory-positive'}">${row.available}</span></td><td>${row.rented>0 ? `<button class="action-btn edit" onclick="toggleInventoryHolders(${row.id})">Ətraflı</button><div class="inventory-holders-detail hidden" id="inv-holders-${row.id}"></div>` : '<span class="inventory-empty-holder">Hazırda heç kimdə deyil</span>'}</td><td><div class="action-cell"><button class="action-btn" style="background:#e6f7ee;color:#0a7a3d" onclick="openSellInventoryModal(${row.id})" ${row.available<=0?'disabled title="Boş qalıq yoxdur"':''}>Satış</button><button class="action-btn edit" onclick="openInventoryItemModal(${row.id})">Edit</button><button class="action-btn delete" onclick="deleteInventoryStock(${row.id})">Sil</button></div></td></tr>`).join('');
+}
+
+// DÜZƏLİŞ: Yeni funksionallıq — Anbardakı malı İCARƏYƏ yox, BİR DƏFƏLİK SATMAQ.
+// Satıldıqda TotalCount HƏMİŞƏLİK azalır (icarə kimi geri qayıtması gözlənilmir).
+function openSellInventoryModal(stockId){
+  const row = (inventoryCache||[]).find(r => r.id === stockId);
+  if(!row) return;
+  const ov = document.createElement('div');
+  ov.className = 'modal-overlay';
+  ov.innerHTML = `
+    <div class="modal-card small-modal">
+      <div class="modal-head"><h3>Satış — ${escapeHtml(row.name)}</h3></div>
+      <div class="form-grid-2">
+        <div class="form-group full"><label>Boş qalıq</label><input value="${row.available}" disabled /></div>
+        <div class="form-group"><label>Satılan say</label><input type="number" id="sellQty" min="0.01" step="0.01" max="${row.available}" placeholder="Məs: 5" /></div>
+        <div class="form-group"><label>Vahid qiymət (AZN)</label><input type="number" id="sellPrice" min="0" step="0.01" placeholder="Məs: 12.50" /></div>
+        <div class="form-group full"><label>Müştəri (könüllü)</label><input id="sellCustomer" placeholder="Ad, soyad" /></div>
+        <div class="form-group full"><label>Qeyd (könüllü)</label><input id="sellNote" /></div>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-btn" data-cancel>Ləğv et</button>
+        <button class="primary-btn" id="sellSaveBtn">Sat</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if(e.target === ov) ov.remove(); });
+  ov.querySelector('[data-cancel]').addEventListener('click', () => ov.remove());
+  ov.querySelector('#sellSaveBtn').addEventListener('click', async () => {
+    const qty = Number(document.getElementById('sellQty').value || 0);
+    const price = Number(document.getElementById('sellPrice').value || 0);
+    if(qty <= 0) return alert('Satılan sayı yaz.');
+    if(qty > row.available) return alert('Boş qalıqdan çox sata bilməzsən (boş qalıq: ' + row.available + ').');
+    if(price < 0) return alert('Qiymət mənfi ola bilməz.');
+    const btn = document.getElementById('sellSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saxlanılır…';
+    try {
+      await API.inventory.sell(stockId, {
+        quantity: qty,
+        unitPrice: price,
+        customerName: (document.getElementById('sellCustomer').value || '').trim(),
+        note: (document.getElementById('sellNote').value || '').trim(),
+      });
+      ov.remove();
+      renderInventorySection();
+    } catch (e) {
+      alert('Xəta: ' + (e.message || 'satış uğursuz oldu'));
+      btn.disabled = false; btn.textContent = 'Sat';
+    }
+  });
 }
 function getInventoryCategoryOptions(){
   // DÜZƏLİŞ (tapşırıq 4): "Təkərli lesa" (gündəlik icarə/billing kateqoriyasıdır, sayıla bilən

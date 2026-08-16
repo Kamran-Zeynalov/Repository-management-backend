@@ -10,6 +10,8 @@ namespace Repository_management_backend.Services
         Task<List<RentedItemDto>> GetRentedItemsAsync();
         Task<ServiceResult<InventoryStockDto>> CreateAsync(CreateInventoryStockDto dto);
         Task<ServiceResult<InventoryStockDto>> UpdateAsync(UpdateInventoryStockDto dto);
+        Task<ServiceResult<InventorySaleDto>> SellAsync(int id, SellInventoryDto dto);
+        Task<List<InventorySaleDto>> GetSalesAsync(int? stockId = null);
         Task<ServiceResult> DeleteAsync(int id);
     }
 }

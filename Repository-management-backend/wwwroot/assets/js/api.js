@@ -121,6 +121,9 @@
       create:  (dto)     => post("/api/inventory", dto),
       update:  (id, dto) => put("/api/inventory/" + id, dto),
       remove:  (id)      => del("/api/inventory/" + id),
+      // DÜZƏLİŞ: bir dəfəlik satış
+      sell:    (id, dto) => post("/api/inventory/" + id + "/sell", dto),
+      sales:   (stockId) => get("/api/inventory/sales" + qs({ stockId: stockId })),
     },
 
     invoices: {

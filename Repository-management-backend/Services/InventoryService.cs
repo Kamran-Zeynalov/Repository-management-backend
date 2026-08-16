@@ -11,12 +11,14 @@ namespace Repository_management_backend.Services
         private readonly IInventoryRepository _repo;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _current;
+        private readonly ILogger<InventoryService> _logger;
 
-        public InventoryService(IInventoryRepository repo, IMapper mapper, ICurrentUserService current)
+        public InventoryService(IInventoryRepository repo, IMapper mapper, ICurrentUserService current, ILogger<InventoryService> logger)
         {
             _repo = repo;
             _mapper = mapper;
             _current = current;
+            _logger = logger;
         }
 
         public async Task<List<InventoryStockDto>> GetAllAsync()
@@ -132,6 +134,78 @@ namespace Repository_management_backend.Services
             outDto.RentedOut = rentedOut;
             outDto.FreeCount = stock.TotalCount - rentedOut;
             return ServiceResult<InventoryStockDto>.Ok(outDto);
+        }
+
+        public async Task<List<InventorySaleDto>> GetSalesAsync(int? stockId = null)
+        {
+            var sales = await _repo.GetSalesAsync(stockId);
+            return sales.Select(s => new InventorySaleDto
+            {
+                Id = s.Id,
+                InventoryStockId = s.InventoryStockId,
+                StockName = s.StockNameSnapshot,
+                Quantity = s.Quantity,
+                UnitPrice = s.UnitPrice,
+                TotalAmount = s.TotalAmount,
+                CustomerName = s.CustomerName,
+                Note = s.Note,
+                SoldByUserName = s.SoldByUserName,
+                SoldAt = s.SoldAt
+            }).ToList();
+        }
+
+        public async Task<ServiceResult<InventorySaleDto>> SellAsync(int id, SellInventoryDto dto)
+        {
+            var stock = await _repo.GetByIdAsync(id);
+            if (stock == null)
+                return ServiceResult<InventorySaleDto>.Fail("Anbar malı tapılmadı.");
+            if (dto.Quantity <= 0)
+                return ServiceResult<InventorySaleDto>.Fail("Satılan say sıfırdan böyük olmalıdır.");
+
+            // DÜZƏLİŞ: icarədə olan mal təsadüfən satılmasın deyə — yalnız BOŞ QALIQ qədər satıla bilər.
+            var rented = await _repo.GetOpenRentedRowsAsync();
+            var rentedOut = rented.Where(r => Matches(stock.Name, r)).Sum(r => r.Remaining);
+            var free = stock.TotalCount - rentedOut;
+            if (dto.Quantity > free)
+                return ServiceResult<InventorySaleDto>.Fail($"Boş qalıqdan çox satıla bilməz. Boş qalıq: {free}.");
+
+            stock.TotalCount -= dto.Quantity;
+            _repo.Update(stock);
+
+            var sale = new InventorySale
+            {
+                BranchId = _current.BranchId,
+                InventoryStockId = stock.Id,
+                StockNameSnapshot = stock.Name,
+                Quantity = dto.Quantity,
+                UnitPrice = dto.UnitPrice,
+                TotalAmount = dto.Quantity * dto.UnitPrice,
+                CustomerName = string.IsNullOrWhiteSpace(dto.CustomerName) ? null : dto.CustomerName.Trim(),
+                Note = string.IsNullOrWhiteSpace(dto.Note) ? null : dto.Note.Trim(),
+                SoldByUserId = _current.UserId,
+                SoldByUserName = _current.Name,
+                SoldAt = DateTime.UtcNow
+            };
+            await _repo.AddSaleAsync(sale);
+            await _repo.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Satış: {StockName} x{Quantity} = {Total} AZN (Filial={BranchId}, Satan={UserName})",
+                stock.Name, dto.Quantity, sale.TotalAmount, _current.BranchId, _current.Name);
+
+            return ServiceResult<InventorySaleDto>.Ok(new InventorySaleDto
+            {
+                Id = sale.Id,
+                InventoryStockId = stock.Id,
+                StockName = stock.Name,
+                Quantity = sale.Quantity,
+                UnitPrice = sale.UnitPrice,
+                TotalAmount = sale.TotalAmount,
+                CustomerName = sale.CustomerName,
+                Note = sale.Note,
+                SoldByUserName = sale.SoldByUserName,
+                SoldAt = sale.SoldAt
+            });
         }
 
         public async Task<ServiceResult> DeleteAsync(int id)

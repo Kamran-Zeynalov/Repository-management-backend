@@ -40,6 +40,20 @@ namespace Repository_management_backend.Controllers
         public async Task<ActionResult<List<RentedItemDto>>> GetRented()
             => Ok(await _service.GetRentedItemsAsync());
 
+        // GET: /api/inventory/sales?stockId=5  (satış tarixçəsi — hamısı və ya konkret mal üçün)
+        [HttpGet("sales")]
+        public async Task<ActionResult<List<InventorySaleDto>>> GetSales([FromQuery] int? stockId)
+            => Ok(await _service.GetSalesAsync(stockId));
+
+        // POST: /api/inventory/5/sell  (BİR DƏFƏLİK SATIŞ — icarədən fərqli, TotalCount həmişəlik azalır)
+        [HttpPost("{id:int}/sell")]
+        [Authorize(Policy = "CanCreate")]
+        public async Task<ActionResult<InventorySaleDto>> Sell(int id, [FromBody] SellInventoryDto dto)
+        {
+            var result = await _service.SellAsync(id, dto);
+            return result.Success ? Ok(result.Data) : BadRequest(new { error = result.Error });
+        }
+
         // POST: /api/inventory
         [HttpPost]
         [Authorize(Policy = "CanCreate")]

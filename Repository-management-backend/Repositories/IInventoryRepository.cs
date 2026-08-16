@@ -22,6 +22,8 @@ namespace Repository_management_backend.Repositories
         Task<InventoryStock?> GetByIdAsync(int id);
         Task<bool> NameExistsAsync(string name, int branchId, int? excludeId = null);
         Task<List<RentedRow>> GetOpenRentedRowsAsync();
+        Task AddSaleAsync(InventorySale sale);
+        Task<List<InventorySale>> GetSalesAsync(int? stockId = null);
         Task AddAsync(InventoryStock stock);
         void Update(InventoryStock stock);
         void Remove(InventoryStock stock);
